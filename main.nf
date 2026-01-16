@@ -114,7 +114,7 @@ workflow {
   Channel.fromPath(params.samples).splitCsv(header:true).map{row ->
     [row.sample, file(row.hap1, checkIfExists:true), file(row.hap2, checkIfExists:true), file(row.reads, checkIfExists:true)]}.set{input_ch}
   bam_to_fastq(input_ch.map{[it[0], it[3]]}).set{fq_ch}
-  make_dip_asm(input_ch.map{[it[0], it[1], it[3]]}).set{dip_ch};
+  make_dip_asm(input_ch.map{[it[0], it[1], it[2]]}).set{dip_ch};
   map_asm(dip_ch.combine(fq_ch, by: 0)).set{bam_ch}
   deepvariant(dip_ch.combine(bam_ch, by: 0)).set{vcf_ch}
   filter_alt_reads(bam_ch.combine(vcf_ch, by: 0)).set{bam_filter_ch}
