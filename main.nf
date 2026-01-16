@@ -1,3 +1,16 @@
+process bam_to_fastq {
+  container "docker://mobinasri/flagger:v1.2.0"
+  input:
+  tuple val(sample_name), path(sample_reads)
+  output:
+  tuple val(sample_name), path("${sample_reads.baseName}.fq.gz")
+
+  script:
+  """
+  samtools fastq -@ ${task.cpus} ${sample_reads} | gzip > ${sample_reads.baseName}.fq.gz
+  """
+}
+
 process make_dip_asm {
   container "docker://mobinasri/flagger:v1.2.0"
   input:
@@ -9,13 +22,12 @@ process make_dip_asm {
   script:
   """
   cat ${hap1} ${hap2} | bgzip > "${sample_name}_dip.fa.gz"
-
   """
 }
 process map_asm {
   container "docker://mobinasri/flagger:v1.2.0"
   input:
-  tuple val(sample_name), path(reads), path(dip_asm)
+  tuple val(sample_name), path(dip_asm), path(reads)
 
   output:
   tuple val(sample_name), path("${sample_name}.bam")
@@ -101,4 +113,10 @@ container "docker://mobinasri/flagger:v1.2.0"
 workflow {
   Channel.fromPath(params.samples).splitCsv(header:true).map{row ->
     [row.sample, file(row.hap1, checkIfExists:true), file(row.hap2, checkIfExists:true), file(row.reads, checkIfExists:true)]}.set{input_ch}
+  bam_to_fastq(input_ch.map{[it[0], it[3]]}).set{fq_ch}
+  make_dip_asm(input_ch.map{[it[0], it[1], it[3]]}).set{dip_ch};
+  map_asm(dip_ch.combine(fq_ch, by: 0)).set{bam_ch}
+  deepvariant(dip_ch.combine(bam_ch, by: 0)).set{vcf_ch}
+  filter_alt_reads(bam_ch.combine(vcf_ch, by: 0)).set{bam_filter_ch}
+  run_flagger(dip_ch.combine(bam_filter_ch, by: 0))
 }
