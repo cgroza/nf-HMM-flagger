@@ -21,7 +21,7 @@ process make_dip_asm {
 
   script:
   """
-  cat ${hap1} ${hap2} | bgzip > "${sample_name}_dip.fa.gz"
+  zcat ${hap1} ${hap2} | bgzip > "${sample_name}_dip.fa.gz"
   """
 }
 process map_asm {
