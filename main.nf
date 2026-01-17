@@ -25,7 +25,7 @@ process make_dip_asm {
   """
 }
 process map_asm {
-  container "docker://mobinasri/flagger:v1.2.0"
+  container 'library://cgroza/collection/graffite:latest'
   input:
   tuple val(sample_name), path(dip_asm), path(reads)
 
