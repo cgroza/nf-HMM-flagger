@@ -56,7 +56,7 @@ process deepvariant {
     --ref="${dip_asm}" \
     --reads="${bam}" \
     --output_vcf="${sample_name}_dip_all.vcf" \
-    --make_examples_extra_args="keep_supplementary_alignments=true, min_mapping_quality=0" \
+    --make_examples_extra_args="keep_supplementary_alignments=true,min_mapping_quality=0" \
     --call_variants_extra_args="use_openvino=true" \
     --num_shards=${task.cpus} \
     --dry_run=false
