@@ -38,7 +38,7 @@ process map_asm {
   meryl print greater-than distinct=0.9998 merylDB > repetitive_k15.txt
 
   winnowmap -W repetitive_k15.txt -ax map-pb -Y -L --eqx --cs -I8g ${dip_asm} ${reads} | \
-    samtools view -hb > ${sample_name}.bam
+    samtools sort -@ ${task.cpus} -OBAM -o ${sample_name}.bam -
   """
 }
 
