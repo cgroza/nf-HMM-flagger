@@ -52,6 +52,7 @@ process deepvariant {
   script:
   """
   samtools faidx ${dip_asm}
+  samtools index ${bam}
   /opt/deepvariant/bin/run_deepvariant \
     --model_type="PACBIO" \
     --ref="${dip_asm}" \
