@@ -60,7 +60,7 @@ process deepvariant {
     --output_vcf="${sample_name}_dip_all.vcf" \
     --make_examples_extra_args="keep_supplementary_alignments=true,min_mapping_quality=0" \
     --call_variants_extra_args="use_openvino=true" \
-    --num_shards=${task.cpus} \
+    --num_shards=${task.cpus/2} \
     --dry_run=false
 
   bcftools view -Ov -f PASS -m2 -M2 -v snps -e 'FORMAT/VAF<~{vafCutoff} | FORMAT/GQ<~{qCutoff}' ${sample_name}_dip_all.vcf > ${sample_name}_dip.vcf
