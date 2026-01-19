@@ -43,7 +43,7 @@ process map_asm {
 }
 
 process deepvariant {
-  container "docker://google/deepvariant:1.3.0"
+  container "docker://google/deepvariant:1.9.0"
   input:
   tuple val(sample_name), path(dip_asm), path(bam)
   output:
