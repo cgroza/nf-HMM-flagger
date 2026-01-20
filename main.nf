@@ -125,8 +125,6 @@ container "docker://mobinasri/flagger:v1.2.0"
   tuple val(sample_name), path("${sample_name}_hmm_flagger_outputs")
 
 """
-  samtools depth -aa -Q 0 ${INPUT_DIR}/read_alignment.bam > ${INPUT_DIR}/read_alignment.depth
-
   bam2cov --bam ${bam} \
     --output coverage_file.cov.gz \
     --threads ${task.cpus}
