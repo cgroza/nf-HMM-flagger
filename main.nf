@@ -106,11 +106,12 @@ process filter_alt_reads {
 
   script:
   """
+  bcftools view -e 'FORMAT/GQ < 20 | FORMAT/VAF < 0.1' ${snps_vcf} > dip.vcf
   filter_alt_reads \
     -i "${bam}" \
     -o "${sample_name}_filtered.bam" \
     -f "removed.bam" \
-    -v "${snps_vcf}" \
+    -v dip.vcf \
     -t ${task.cpus} \
     -m 1000 \
     -r 0.4
