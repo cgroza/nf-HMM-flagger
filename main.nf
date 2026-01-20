@@ -146,8 +146,9 @@ workflow {
   bam_to_fastq(input_ch.map{[it[0], it[3]]}).set{fq_ch}
   make_dip_asm(input_ch.map{[it[0], it[1], it[2]]}).set{dip_ch};
   map_asm(dip_ch.combine(fq_ch, by: 0)).set{bam_ch}
-  secphase(dip_ch.combine(bam_ch, by: 0)).set{secphase_ch}
-  deepvariant(dip_ch.combine(secphase_ch, by: 0)).set{vcf_ch}
-  filter_alt_reads(secphase_ch.combine(vcf_ch, by: 0)).set{bam_filter_ch}
+  // secphase(dip_ch.combine(bam_ch, by: 0)).set{secphase_ch}
+  deepvariant(dip_ch.combine(bam_ch, by: 0)).set{vcf_ch}
+  // filter_alt_reads(secphase_ch.combine(vcf_ch, by: 0)).set{bam_filter_ch}
+  filter_alt_reads(bam_ch.combine(vcf_ch, by: 0)).set{bam_filter_ch}
   run_flagger(bam_filter_ch.combine(Channel.fromPath(params.config)))
 }
