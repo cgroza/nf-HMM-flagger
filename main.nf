@@ -127,7 +127,7 @@ container "docker://mobinasri/flagger:v1.2.0"
 """
   mkdir ${sample_name}_flagger
   samtools index ${bam}
-  bam2cov --bam ${bam} \
+  bam2cov -u -M 1000 --bam ${bam} \
     --output coverage_file.cov.gz \
     --threads ${task.cpus}
 
