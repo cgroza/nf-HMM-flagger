@@ -122,9 +122,10 @@ container "docker://mobinasri/flagger:v1.2.0"
   input:
   tuple val(sample_name), path(dip_asm), path(bam)
   output:
-  tuple val(sample_name), path("${sample_name}_hmm_flagger_outputs")
+  tuple val(sample_name), path("${sample_name}_flagger")
 
 """
+  mkdir ${sample_name}_flagger
   samtools index ${bam}
   bam2cov --bam ${bam} \
     --output coverage_file.cov.gz \
@@ -132,7 +133,7 @@ container "docker://mobinasri/flagger:v1.2.0"
 
   hmm_flagger \
     --input coverage_file.cov.gz \
-    --outputDir ${sample_name}_hmm_flagger_outputs  \
+    --outputDir ${sample_name}_flagger  \
     --alphaTsv /home/programs/config/alpha_optimum_trunc_exp_gaussian_w_4000_n_50.tsv \
     --labelNames Err,Dup,Hap,Col \
     --threads ${task.cpus}
