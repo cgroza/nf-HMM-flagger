@@ -106,7 +106,7 @@ process filter_alt_reads {
 
   script:
   """
-  bcftools view -e 'FORMAT/GQ < 20 | FORMAT/VAF < 0.1' ${snps_vcf} > dip.vcf
+  bcftools view -e 'FORMAT/GQ < 30 | FORMAT/VAF < 0.2' ${snps_vcf} > dip.vcf
   filter_alt_reads \
     -i "${bam}" \
     -o "${sample_name}_filtered.bam" \
