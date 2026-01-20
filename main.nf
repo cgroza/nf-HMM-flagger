@@ -66,6 +66,35 @@ process deepvariant {
   """
 }
 
+process secphase {
+  container "docker://mobinasri/secphase:v0.4.4"
+
+  input:
+  tuple val(sample_name), path(dip_asm), path(bam)
+
+  output:
+  tuple val(sample_name), path("${sample_name}_secphase.bam")
+
+  script:
+  """
+  mkdir out
+  samtools sort -n -@ ${task.cpus} ${bam} > sorted_qname.bam
+
+	secphase --hifi \
+	  -i sorted_qname.bam \
+	  -f ${dip_asm} \
+	  --outDir out \
+	  --prefix ${sample_name} \
+	  --threads ${task.cpus}
+
+  correct_bam \
+	  -i ${bam} \
+	  -P out/${sample_name}.out.log \
+	  -o ${sample_name}_secphase.bam \
+	  --primaryOnly
+  """
+}
+
 process filter_alt_reads {
   container "docker://mobinasri/flagger:v1.2.0"
 
@@ -117,7 +146,8 @@ workflow {
   bam_to_fastq(input_ch.map{[it[0], it[3]]}).set{fq_ch}
   make_dip_asm(input_ch.map{[it[0], it[1], it[2]]}).set{dip_ch};
   map_asm(dip_ch.combine(fq_ch, by: 0)).set{bam_ch}
-  deepvariant(dip_ch.combine(bam_ch, by: 0)).set{vcf_ch}
-  filter_alt_reads(bam_ch.combine(vcf_ch, by: 0)).set{bam_filter_ch}
+  secphase(dip_ch.combine(bam_ch, by: 0)).set{secphase_ch}
+  deepvariant(dip_ch.combine(secphase_ch, by: 0)).set{vcf_ch}
+  filter_alt_reads(secphase_ch.combine(vcf_ch, by: 0)).set{bam_filter_ch}
   run_flagger(dip_ch.combine(bam_filter_ch, by: 0))
 }
