@@ -107,7 +107,7 @@ process filter_alt_reads {
   script:
   """
   filter_alt_reads \
-    -i ${bam}" \
+    -i "${bam}" \
     -o "${sample_name}_filtered.bam" \
     -f "removed.bam" \
     -v "${snps_vcf}" \
