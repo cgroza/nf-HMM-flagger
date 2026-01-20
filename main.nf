@@ -62,7 +62,7 @@ process deepvariant {
     --num_shards=${task.cpus/2} \
     --dry_run=false
 
-  bcftools view -Ov -f PASS -m2 -M2 -v snps -e 'FORMAT/VAF<~{vafCutoff} | FORMAT/GQ<~{qCutoff}' ${sample_name}_dip_all.vcf > ${sample_name}_dip.vcf
+  bcftools view -Ov -f PASS -m2 -M2 -v snps  ${sample_name}_dip_all.vcf > ${sample_name}_dip.vcf
   """
 }
 
