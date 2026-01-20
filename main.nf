@@ -120,7 +120,7 @@ process filter_alt_reads {
 process run_flagger {
 container "docker://mobinasri/flagger:v1.2.0"
   input:
-  tuple val(sample_name), path(dip_asm), path(bam)
+  tuple val(sample_name), path(bam), path(config)
   output:
   tuple val(sample_name), path("${sample_name}_flagger")
 
@@ -134,7 +134,7 @@ container "docker://mobinasri/flagger:v1.2.0"
   hmm_flagger \
     --input coverage_file.cov.gz \
     --outputDir ${sample_name}_flagger  \
-    --alphaTsv /home/programs/config/alpha_optimum_trunc_exp_gaussian_w_4000_n_50.tsv \
+    --alphaTsv ${config} \
     --labelNames Err,Dup,Hap,Col \
     --threads ${task.cpus}
 """
@@ -149,5 +149,5 @@ workflow {
   secphase(dip_ch.combine(bam_ch, by: 0)).set{secphase_ch}
   deepvariant(dip_ch.combine(secphase_ch, by: 0)).set{vcf_ch}
   filter_alt_reads(secphase_ch.combine(vcf_ch, by: 0)).set{bam_filter_ch}
-  run_flagger(dip_ch.combine(bam_filter_ch, by: 0))
+  run_flagger(bam_filter_ch.combine(Channel.fromPath(params.config)))
 }
