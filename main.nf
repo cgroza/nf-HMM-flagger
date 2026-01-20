@@ -59,7 +59,7 @@ process deepvariant {
     --reads="${bam}" \
     --output_vcf="${sample_name}_dip_all.vcf" \
     --make_examples_extra_args="keep_supplementary_alignments=true,min_mapping_quality=0" \
-    --num_shards=${task.cpus/2} \
+    --num_shards=${task.cpus} \
     --dry_run=false
 
   bcftools view -Ov -f PASS -m2 -M2 -v snps  ${sample_name}_dip_all.vcf > ${sample_name}_dip.vcf
