@@ -121,7 +121,7 @@ process filter_alt_reads {
 }
 
 process run_flagger {
-  publishDir "flgager_out/", mode: 'copy'
+  publishDir "flagger_out/", mode: 'copy'
   container "docker://mobinasri/flagger:v1.2.0"
   input:
   tuple val(sample_name), path(bam), path(config)
