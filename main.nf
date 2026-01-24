@@ -24,6 +24,35 @@ process make_dip_asm {
   zcat ${hap1} ${hap2} | bgzip > "${sample_name}_dip.fa.gz"
   """
 }
+
+process map_dip_asms {
+  container "docker://mobinasri/flagger:v1.2.0"
+  input:
+  tuple val(sample_name), path(hap1), path(hap2)
+
+  output:
+  tuple val(sample_name), path("${sample_name}_asm.bam")
+  """
+  minimap2 -k 19 -a -x asm5 -D -I8g -t8 ${hap1} ${hap2} | samtools view -h -b | samtools sort -@ ${task.cpus} > ${sample_name}_asm.bam
+  """
+}
+
+process filter_hmm_flagger {
+  container "docker://mobinasri/flagger:v1.2.0"
+  input:
+  tuple val(sample_name), path(flagger_dir), path(asm_bam)
+  output:
+  tuple val(sample_name), path("${sample_name}_conservative.bed")
+  """
+  samtools index ${asm_bam}
+  python3 /home/programs/src/filter_hmm_flagger_calls.py \
+    --inputBam ${asm_bam} \
+    --inputBed ${flagger_dir}/final_flagger_prediction.bed \
+    --outputBed ${sample_name}_conservative.bed \
+    --threads ${task.cpus}
+  """
+}
+
 process map_asm {
   container 'library://cgroza/collection/graffite:latest'
   input:
@@ -154,5 +183,9 @@ workflow {
   deepvariant(dip_ch.combine(secphase_ch, by: 0)).set{vcf_ch}
   filter_alt_reads(secphase_ch.combine(vcf_ch, by: 0)).set{bam_filter_ch}
   // filter_alt_reads(bam_ch.combine(vcf_ch, by: 0)).set{bam_filter_ch}
-  run_flagger(bam_filter_ch.combine(Channel.fromPath(params.config)))
+  run_flagger(bam_filter_ch.combine(Channel.fromPath(params.config))).set{flagger_ch}
+
+  // conservative calls
+  map_dip_asms(input_ch.map{[it[0], it[1], it[2]]}).set{mapped_asms_ch};
+  filter_hmm_flagger(flagger_ch.combine(mapped_asms_ch, by: 0))
 }
