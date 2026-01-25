@@ -28,12 +28,12 @@ process make_dip_asm {
 process map_dip_asms {
   container 'library://cgroza/collection/graffite:latest'
   input:
-  tuple val(sample_name), path(hap1), path(hap2)
+  tuple val(sample_name), path(dip_asm)
 
   output:
   tuple val(sample_name), path("${sample_name}_asm.bam")
   """
-  minimap2 -k 19 -a -x asm5 -D -I8g -t8 ${hap1} ${hap2} | samtools view -h -b | samtools sort -@ ${task.cpus} > ${sample_name}_asm.bam
+  minimap2 -k 19 -a -x asm5 -D -I8g -t8 ${dip_asm} ${dip_asm} | samtools view -h -b | samtools sort -@ ${task.cpus} > ${sample_name}_asm.bam
   """
 }
 
@@ -186,6 +186,6 @@ workflow {
   run_flagger(bam_filter_ch.combine(Channel.fromPath(params.config))).set{flagger_ch}
 
   // conservative calls
-  map_dip_asms(input_ch.map{[it[0], it[1], it[2]]}).set{mapped_asms_ch};
+  map_dip_asms(dip_ch).set{mapped_asms_ch};
   filter_hmm_flagger(flagger_ch.combine(mapped_asms_ch, by: 0))
 }
