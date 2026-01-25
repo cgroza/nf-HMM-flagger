@@ -39,6 +39,7 @@ process map_dip_asms {
 
 process filter_hmm_flagger {
   container "docker://mobinasri/flagger:v1.2.0"
+  publishDir "flagger_out/", mode: 'copy'
   input:
   tuple val(sample_name), path(flagger_dir), path(asm_bam)
   output:
