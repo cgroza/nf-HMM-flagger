@@ -32,6 +32,8 @@ process map_dip_asms {
 
   output:
   tuple val(sample_name), path("${sample_name}_asm.bam")
+
+  script:
   """
   minimap2 -k 19 -a -x asm5 -D -I8g -t8 ${dip_asm} ${dip_asm} | samtools view -h -b | samtools sort -@ ${task.cpus} > ${sample_name}_asm.bam
   """
@@ -44,6 +46,8 @@ process filter_hmm_flagger {
   tuple val(sample_name), path(flagger_dir), path(asm_bam)
   output:
   tuple val(sample_name), path("${sample_name}_conservative.bed")
+
+  script:
   """
   samtools index ${asm_bam}
   python3 /home/programs/src/filter_hmm_flagger_calls.py \
@@ -158,6 +162,7 @@ process run_flagger {
   output:
   tuple val(sample_name), path("${sample_name}_flagger")
 
+  script:
 """
   mkdir ${sample_name}_flagger
   samtools index ${bam}
